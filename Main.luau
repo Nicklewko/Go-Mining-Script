@@ -7,14 +7,63 @@ local ItemData = require(game.ReplicatedStorage.Modules.ItemsModule)
 
 local MineRemote = game.ReplicatedStorage.Events.ClientRemoteEvents.MineOre
 local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/jxinxy/alphalibrary/refs/heads/main/main.luau"))()
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
-local WorkspaceBlocks = workspace:WaitForChild("Blocks")
+local noclip = false
+local walkSpd = 16
+local jumpH = 12
+local antiAfk = false
+local autoMineOres = false
 
 local MineRange = 600
-local MinRar = 1000
-local BlocksPerTick = 100
+local MinRar = 100
+local BlocksPerTick = 25
 local MaxAttempts = 15
 local Recipe = nil --"Lucky Staff"
+
+local Window = Rayfield:CreateWindow({
+	Name="Astro Hub", Icon=0,
+	LoadingTitle="Astro Hub", LoadingSubtitle="By Someone",
+	ShowText="Rayfield",
+	Theme={
+		TextColor=Color3.fromRGB(255,255,255),
+		Background=Color3.fromRGB(10,10,10),
+		Topbar=Color3.fromRGB(18,18,18),
+		Shadow=Color3.fromRGB(0,0,0),
+		NotificationBackground=Color3.fromRGB(15,15,15),
+		NotificationActionsBackground=Color3.fromRGB(240,240,240),
+		TabBackground=Color3.fromRGB(25,25,25),
+		TabStroke=Color3.fromRGB(45,45,45),
+		TabBackgroundSelected=Color3.fromRGB(245,245,245),
+		TabTextColor=Color3.fromRGB(200,200,200),
+		SelectedTabTextColor=Color3.fromRGB(15,15,15),
+		ElementBackground=Color3.fromRGB(20,20,20),
+		ElementBackgroundHover=Color3.fromRGB(30,30,30),
+		SecondaryElementBackground=Color3.fromRGB(14,14,14),
+		ElementStroke=Color3.fromRGB(45,45,45),
+		SecondaryElementStroke=Color3.fromRGB(35,35,35),
+		SliderBackground=Color3.fromRGB(255,255,255),
+		SliderProgress=Color3.fromRGB(130,130,130),
+		SliderStroke=Color3.fromRGB(180,180,180),
+		ToggleBackground=Color3.fromRGB(20,20,20),
+		ToggleEnabled=Color3.fromRGB(255,255,255),
+		ToggleDisabled=Color3.fromRGB(60,60,60),
+		ToggleEnabledStroke=Color3.fromRGB(220,220,220),
+		ToggleDisabledStroke=Color3.fromRGB(90,90,90),
+		ToggleEnabledOuterStroke=Color3.fromRGB(140,140,140),
+		ToggleDisabledOuterStroke=Color3.fromRGB(40,40,40),
+		DropdownSelected=Color3.fromRGB(40,40,40),
+		DropdownUnselected=Color3.fromRGB(20,20,20),
+		InputBackground=Color3.fromRGB(18,18,18),
+		InputStroke=Color3.fromRGB(55,55,55),
+		PlaceholderColor=Color3.fromRGB(140,140,140),
+	},
+	ToggleUIKeybind="K",
+	ConfigurationSaving={ Enabled=true, FolderName=nil, FileName="GoMining" },
+})
+Rayfield:Notify({ Title="Loading...", Content="Please wait.", Duration=5, Image=4483362458 })
+
+local WorkspaceBlocks = workspace:WaitForChild("Blocks")
 
 local sorted = {}
 
@@ -115,16 +164,78 @@ WorkspaceBlocks.ChildAdded:Connect(logBlock)
 
 WorkspaceBlocks.ChildRemoved:Connect(unlog)
 
-task.spawn(function()
-    local bl = 0
+local function ListAllBlocks()
+	local bl = 0
     for i, v in pairs(WorkspaceBlocks:GetChildren()) do
         bl += 1
         if bl % BlocksPerTick == 0 then task.wait() end
         logBlock(v)
     end
+end
+
+task.spawn(function()
+   	while task.wait(5) do
+		ListAllBlocks()
+	end
+end)
+
+task.spawn(function()
+	while task.wait(0.05) do
+		if noclip then noclipLoop() end
+		local char=player.Character
+		if char then
+			local hum=char:FindFirstChild("Humanoid")
+			if hum then
+				if hum.WalkSpeed  ~= walkSpd then hum.WalkSpeed  = walkSpd end
+				if hum.JumpHeight ~= jumpH   then hum.JumpHeight = jumpH   end
+			end
+		end
+	end
 end)
 
 warn("Initiated")
-while task.wait(0.35) do
-    LoopMineAll()
-end
+task.spawn(function()(
+	while task.wait(0.35) do
+		if not autoMineOres then continue end
+    	LoopMineAll()
+	end
+end)
+
+local InfoTab   = Window:CreateTab("Info",   4483362458)
+local PlayerTab = Window:CreateTab("Player", 4483362458)
+local AutoTab   = Window:CreateTab("Auto",   4483362458)
+
+local dcInvite = "https://discord.gg/"
+
+InfoTab:CreateSection("About")
+InfoTab:CreateLabel("Go Mining Script")
+InfoTab:CreateParagraph({ Title="Discord:", Content=dcInvite })
+InfoTab:CreateButton({
+	Name = "Copy to clipboard",
+	Callback = function() setclipboard(dcInvite) end,
+})
+InfoTab:CreateSection("Notes")
+InfoTab:CreateParagraph({ Title="NOTE:", Content="Ts is heavily WIP" })
+InfoTab:CreateSection("Hotkeys")
+InfoTab:CreateLabel("K — Toggle UI")
+
+PlayerTab:CreateSection("Main")
+PlayerTab:CreateToggle({ Name="Noclip", CurrentValue=noclip, Flag="noclip",
+	Callback=function(v) noclip=v end })
+PlayerTab:CreateSlider({ Name="Walk Speed", Range={0,50}, Increment=1,
+	CurrentValue=walkSpd, Flag="walkspd",
+	Callback=function(v) walkSpd=v end })
+PlayerTab:CreateSlider({ Name="Jump Height", Range={0,30}, Increment=0.5,
+	CurrentValue=jumpH, Flag="jumph",
+	Callback=function(v) jumpH=v end })
+
+PlayerTab:CreateSection("Misc")
+PlayerTab:CreateToggle({ Name="Anti-AFK (WIP)", CurrentValue=antiAfk, Flag="antiafk",
+	Callback=function(v) antiAfk=v end })
+
+AutoTab:CreateSection("Main")
+AutoTab:CreateToggle({ Name="Auto Mine Ores", CurrentValue=autoMineOres, Flag="autoMineOres",
+	Callback=function(v) autoMineOres=v; if v then LoopMineAll() end end })
+AutoTab:CreateSlider({ Name="Minimum Rarity", Range={1,999}, Increment=1, Suffix="k",
+	CurrentValue=minRar, Flag="minRar",
+	Callback=function(v) minRar=v*1000 end })
