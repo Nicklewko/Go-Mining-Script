@@ -194,7 +194,7 @@ task.spawn(function()
 end)
 
 warn("Initiated")
-task.spawn(function()(
+task.spawn(function()
 	while task.wait(0.35) do
 		if not autoMineOres then continue end
     	LoopMineAll()
