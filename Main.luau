@@ -1,6 +1,4 @@
 local LocalPlayer = game.Players.LocalPlayer
-local Character = LocalPlayer.Character
-local Root = Character.HumanoidRootPart
 
 local OreData = require(game.ReplicatedStorage.Modules.OresModule).Ores
 local ItemData = require(game.ReplicatedStorage.Modules.ItemsModule)
@@ -10,16 +8,16 @@ local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/jxinxy/al
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local noclip = false
-local walkSpd = 16
-local jumpH = 12
+local walkSpd = 45
+local jumpH = 30
 local antiAfk = false
 local autoMineOres = false
 
-local MineRange = 600
-local MinRar = 100
-local BlocksPerTick = 25
-local MaxAttempts = 15
-local Recipe = nil --"Lucky Staff"
+local mineRange = 600
+local minRar = 100
+local blocksPerTick = 25
+local maxAttempts = 15
+local recipe = nil --"Lucky Staff"
 
 local Window = Rayfield:CreateWindow({
 	Name="Astro Hub", Icon=0,
@@ -84,12 +82,14 @@ end
 
 local function CanMine(block)
     local hitPos = block:GetPivot().Position
-    if CheckDistance(hitPos, Root.Position) >= MineRange then return false end
+	local root = LocalPlayer and LocalPlayer.Character and LocalPlayer.Character.HumanoidRootPart
+	if not root then print("Root missing") return end
+    if CheckDistance(hitPos, root.Position) >= mineRange then return false end
     return true
 end
 
 local function MineWithCheck(block)
-    if sorted[block].Attempt >= MaxAttempts then
+    if sorted[block].Attempt >= maxAttempts then
 		warn("Removed:", block)
 	    unlog(block)
         return
@@ -123,17 +123,17 @@ local function logBlock(block)
         return
     end
 
-    if MinRar
+    if minRar
         and OreData[block.Name]
         and OreData[block.Name].Rarity
-        and OreData[block.Name].Rarity <= MinRar then
+        and OreData[block.Name].Rarity <= minRar then
         return
     end
 
-    if Recipe
-        and ItemData[Recipe]
-        and ItemData[Recipe].block
-        and not ItemData[Recipe].block.Name then
+    if recipe
+        and ItemData[recipe]
+        and ItemData[recipe].block
+        and not ItemData[recipe].block.Name then
         return
     end
 
@@ -150,12 +150,12 @@ local function LoopMineAll()
     local succ, err = pcall(function()
         for block, v in pairs(sorted) do
             bl += 1
-            if bl % BlocksPerTick == 0 then task.wait() end
+            if bl % blocksPerTick == 0 then task.wait() end
             MineWithCheck(block)
         end
     end)
     if not succ then
-        warn(err)
+        print(err)
         return
     end
 end
@@ -168,21 +168,43 @@ local function ListAllBlocks()
 	local bl = 0
     for i, v in pairs(WorkspaceBlocks:GetChildren()) do
         bl += 1
-        if bl % BlocksPerTick == 0 then task.wait() end
+        if bl % blocksPerTick == 0 then task.wait() end
         logBlock(v)
     end
 end
 
 task.spawn(function()
-   	while task.wait(5) do
+	ListAllBlocks()
+   	--[[while task.wait(5) do
 		ListAllBlocks()
-	end
+	end]]
 end)
+
+local noclipPts={}
+local function RebuildNC(char)
+	noclipPts={}
+	if not char then return end
+	for _,d in ipairs(char:GetDescendants()) do
+		if d:IsA("BasePart") then noclipPts[#noclipPts+1]=d end
+	end
+	char.DescendantAdded:Connect(function(d)
+		if d:IsA("BasePart") then noclipPts[#noclipPts+1]=d end
+	end)
+end
+LocalPlayer.CharacterAdded:Connect(RebuildNC)
+if LocalPlayer.Character then RebuildNC(LocalPlayer.Character) end
+
+local function NoclipLoop()
+	for i=1,#noclipPts do
+		local p=noclipPts[i]
+		if p.Parent and p.CanCollide then p.CanCollide=false end
+	end
+end
 
 task.spawn(function()
 	while task.wait(0.05) do
-		if noclip then noclipLoop() end
-		local char=player.Character
+		if noclip then NoclipLoop() end
+		local char=LocalPlayer.Character
 		if char then
 			local hum=char:FindFirstChild("Humanoid")
 			if hum then
@@ -215,17 +237,17 @@ InfoTab:CreateButton({
 	Callback = function() setclipboard(dcInvite) end,
 })
 InfoTab:CreateSection("Notes")
-InfoTab:CreateParagraph({ Title="NOTE:", Content="Ts is heavily WIP" })
+InfoTab:CreateParagraph({ Title="NOTE:", Content="Added UI / Player Section and Auto (fOR)" })
 InfoTab:CreateSection("Hotkeys")
 InfoTab:CreateLabel("K — Toggle UI")
 
 PlayerTab:CreateSection("Main")
 PlayerTab:CreateToggle({ Name="Noclip", CurrentValue=noclip, Flag="noclip",
 	Callback=function(v) noclip=v end })
-PlayerTab:CreateSlider({ Name="Walk Speed", Range={0,50}, Increment=1,
+PlayerTab:CreateSlider({ Name="Walk Speed", Range={0,250}, Increment=1,
 	CurrentValue=walkSpd, Flag="walkspd",
 	Callback=function(v) walkSpd=v end })
-PlayerTab:CreateSlider({ Name="Jump Height", Range={0,30}, Increment=0.5,
+PlayerTab:CreateSlider({ Name="Jump Height", Range={0,100}, Increment=0.5,
 	CurrentValue=jumpH, Flag="jumph",
 	Callback=function(v) jumpH=v end })
 
