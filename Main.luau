@@ -142,7 +142,10 @@ local function logBlock(block)
     }
 
     warn("Added:", block)
-    MineWithCheck(block)
+
+	if autoMineOres then
+		MineWithCheck(block)
+	end
 end
 
 local function LoopMineAll()
