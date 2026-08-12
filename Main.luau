@@ -12,6 +12,7 @@ local walkSpd = 45
 local jumpH = 30
 local antiAfk = false
 local autoMineOres = false
+local autoOpenChests = false
 
 local mineRange = 600
 local minRar = 100
@@ -264,3 +265,7 @@ AutoTab:CreateToggle({ Name="Auto Mine Ores", CurrentValue=autoMineOres, Flag="a
 AutoTab:CreateSlider({ Name="Minimum Rarity", Range={1,999}, Increment=1, Suffix="k",
 	CurrentValue=minRar, Flag="minRar",
 	Callback=function(v) minRar=v*1000 end })
+
+AutoTab:CreateSection("Chests")
+AutoTab:CreateToggle({ Name="Auto Open Chests", CurrentValue=autoOpenChests, Flag="autoMineOres",
+	Callback=function(v) autoOpenChests=v end })
