@@ -20,7 +20,7 @@ local instaOpenChests = true
 local mineRange = 600
 local minRar = 100
 local blocksPerTick = 25
-local maxAttempts = 15
+local maxAttempts = 25
 local recipe = nil --"Lucky Staff"
 
 local chestOpenDuration = 1
@@ -104,6 +104,7 @@ local function UpdateProximityDuration(pp, d)
 	d = d or 0
 	if pp.HoldDuration == d then return end
 	pp.HoldDuration = d
+	pp.RequiresLineOfSight = false
 end
 
 local function PositionRoot(tcf)
@@ -190,6 +191,7 @@ local function OpenChest(m)
     end
 
     PositionRoot(spos)
+	tping = false
 end
 
 local function MineBlock(block)
