@@ -13,6 +13,7 @@ local jumpH = 30
 local antiAfk = false
 local autoMineOres = false
 local autoOpenChests = false
+local instaOpenChests = false
 
 local mineRange = 600
 local minRar = 100
@@ -20,10 +21,13 @@ local blocksPerTick = 25
 local maxAttempts = 15
 local recipe = nil --"Lucky Staff"
 
+local tping = false
+local spos = nil
+
 local Window = Rayfield:CreateWindow({
-	Name="Astro Hub", Icon=0,
-	LoadingTitle="Astro Hub", LoadingSubtitle="By Someone",
-	ShowText="Rayfield",
+	Name="Something", Icon=0,
+	LoadingTitle="Something", LoadingSubtitle="By Someone",
+	ShowText="-... --- -- -... --- -.-. .-.. .- -",
 	Theme={
 		TextColor=Color3.fromRGB(255,255,255),
 		Background=Color3.fromRGB(10,10,10),
@@ -63,6 +67,7 @@ local Window = Rayfield:CreateWindow({
 Rayfield:Notify({ Title="Loading...", Content="Please wait.", Duration=5, Image=4483362458 })
 
 local WorkspaceBlocks = workspace:WaitForChild("Blocks")
+local Chests = workspace:WaitForChild("Chests")
 
 local sorted = {}
 
@@ -70,8 +75,77 @@ local function CheckDistance(p1, p2)
     return (p1 - p2).Magnitude
 end
 
-local function unlog(block)
-    sorted[block] = nil
+local function GetRoot()
+	return LocalPlayer and LocalPlayer.Character and LocalPlayer.Character.HumanoidRootPart
+end
+
+local function FindFirstDescendantOfClass(parent, className)
+	for _, descendant in parent:GetDescendants() do
+		if descendant:IsA(className) then
+			return descendant
+		end
+	end
+	return nil
+end
+
+local function UpdateProximityDuration(pp, d)
+	if typeof(pp) ~= "ProximityPrompt" then
+		pp = FindFirstDescendantOfClass(pp, "ProximityPrompt")
+	end
+	if not pp then return end
+	d = d or 0
+	if pp.HoldDuration == d then return end
+	pp.HoldDuration = d
+end
+
+local function PositionRoot(tcf)
+	local root = GetRoot()
+	if not root then return end
+	root.CFrame = tcf
+end
+
+local noclipPts={}
+local function RebuildNC(char)
+	noclipPts={}
+	if not char then return end
+	for _,d in ipairs(char:GetDescendants()) do
+		if d:IsA("BasePart") then noclipPts[#noclipPts+1]=d end
+	end
+	char.DescendantAdded:Connect(function(d)
+		if d:IsA("BasePart") then noclipPts[#noclipPts+1]=d end
+	end)
+end
+LocalPlayer.CharacterAdded:Connect(RebuildNC)
+if LocalPlayer.Character then RebuildNC(LocalPlayer.Character) end
+
+local function NoclipLoop()
+	for i=1,#noclipPts do
+		local p=noclipPts[i]
+		if p.Parent and p.CanCollide then p.CanCollide=false end
+	end
+end
+
+local function OpenChest(m)
+	local pp = FindFirstDescendantOfClass(m, "ProximityPrompt")
+	if not pp then return end
+
+	if not tping then
+		local r = GetRoot()
+		if r then
+			spos = r.CFrame
+		end
+	end
+	tping = true
+	PositionRoot(m:GetPivot())
+
+	task.wait()
+
+	UpdateProximityDuration(pp, 0)
+	fireproximityprompt(pp)
+
+	task.wait(0.1)
+
+	PositionRoot(spos)
 end
 
 local function MineBlock(block)
@@ -83,10 +157,14 @@ end
 
 local function CanMine(block)
     local hitPos = block:GetPivot().Position
-	local root = LocalPlayer and LocalPlayer.Character and LocalPlayer.Character.HumanoidRootPart
+	local root = GetRoot()
 	if not root then print("Root missing") return end
     if CheckDistance(hitPos, root.Position) >= mineRange then return false end
     return true
+end
+
+local function unlog(block)
+    sorted[block] = nil
 end
 
 local function MineWithCheck(block)
@@ -179,31 +257,7 @@ end
 
 task.spawn(function()
 	ListAllBlocks()
-   	--[[while task.wait(5) do
-		ListAllBlocks()
-	end]]
 end)
-
-local noclipPts={}
-local function RebuildNC(char)
-	noclipPts={}
-	if not char then return end
-	for _,d in ipairs(char:GetDescendants()) do
-		if d:IsA("BasePart") then noclipPts[#noclipPts+1]=d end
-	end
-	char.DescendantAdded:Connect(function(d)
-		if d:IsA("BasePart") then noclipPts[#noclipPts+1]=d end
-	end)
-end
-LocalPlayer.CharacterAdded:Connect(RebuildNC)
-if LocalPlayer.Character then RebuildNC(LocalPlayer.Character) end
-
-local function NoclipLoop()
-	for i=1,#noclipPts do
-		local p=noclipPts[i]
-		if p.Parent and p.CanCollide then p.CanCollide=false end
-	end
-end
 
 task.spawn(function()
 	while task.wait(0.05) do
@@ -224,6 +278,18 @@ task.spawn(function()
 	while task.wait(0.35) do
 		if not autoMineOres then continue end
     	LoopMineAll()
+	end
+end)
+
+task.spawn(function()
+	while task.wait(0.5) do
+		for i, v in pairs(Chests:GetChildren()) do
+			if instaOpenChests then
+				UpdateProximityDuration(v, 0)
+			end
+			if not autoOpenChests then continue end
+			OpenChest(v)
+		end
 	end
 end)
 
@@ -269,3 +335,5 @@ AutoTab:CreateSlider({ Name="Minimum Rarity", Range={1,999}, Increment=1, Suffix
 AutoTab:CreateSection("Chests")
 AutoTab:CreateToggle({ Name="Auto Open Chests", CurrentValue=autoOpenChests, Flag="autoMineOres",
 	Callback=function(v) autoOpenChests=v end })
+AutoTab:CreateToggle({ Name="Instant Chests", CurrentValue=autoMineOres, Flag="instaChests",
+	Callback=function(v) instaOpenChests=v end })
