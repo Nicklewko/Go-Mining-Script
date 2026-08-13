@@ -20,7 +20,7 @@ local autoOpenChests = false
 local instaOpenChests = true
 
 local mineRange = 600
-local minRar = 1
+local minRar = 1000
 local blocksPerTick = 25
 local maxAttempts = 25
 local recipe = nil --"Lucky Staff"
@@ -146,11 +146,12 @@ local function CamLookAtCF(cP, tP)
 end
 
 local function TeleportToSelectedDepth()
-	if not selectedDepth or not autoTpAfterReset then return end
+	if not selectedDepth or not autoTpAfterReset then warn(selectedDepth, autoTpAfterReset) return end
 	TeleportRemote:FireServer(selectedDepth)
 end
 
 ServerChatRemote.OnClientEvent:Connect(function(a, b, c ,d ,e)
+	print(a,b,c,d,e)
 	if e == "MineRegenerated" then
 		TeleportToSelectedDepth()
 	end
@@ -469,7 +470,7 @@ AutoTab:CreateSection("Main")
 AutoTab:CreateToggle({ Name="Auto Mine Ores", CurrentValue=autoMineOres, Flag="autoMineOres",
 	Callback=function(v) autoMineOres=v; if v then LoopMineAll() end end })
 AutoTab:CreateSlider({ Name="Minimum Rarity", Range={1,100}, Increment=1, Suffix="k",
-	CurrentValue=minRar, Flag="minRar",
+	CurrentValue=minRar/1000, Flag="minRar",
 	Callback=function(v) minRar=v*1000 end })
 
 AutoTab:CreateSection("Chests")
@@ -482,7 +483,7 @@ AutoTab:CreateToggle({ Name="Auto Open Chests", CurrentValue=autoOpenChests, Fla
 AfkTab:CreateSection("Layer Teleportation")
 AfkTab:CreateDropdown({ Name="Select Depth", Options=tpDepths, CurrentOption={},
 	MultipleOptions=false, Flag="tpDepthSelection",
-	Callback=function(o) selectedDepth=o end })
+	Callback=function(o) selectedDepth=o[1] end })
 AfkTab:CreateToggle({ Name="Auto teleport after reset", CurrentValue=autoTpAfterReset, Flag="autoTpAfterReset",
 	Callback=function(v) autoTpAfterReset=v end })
 AfkTab:CreateSection("Anti")
