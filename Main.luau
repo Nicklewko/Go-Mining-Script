@@ -7,19 +7,26 @@ local MineRemote = game.ReplicatedStorage.Events.ClientRemoteEvents.MineOre
 local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/jxinxy/alphalibrary/refs/heads/main/main.luau"))()
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
+local V0 = Vector3.zero
+
 local noclip = false
 local walkSpd = 45
 local jumpH = 30
 local antiAfk = false
 local autoMineOres = false
 local autoOpenChests = false
-local instaOpenChests = false
+local instaOpenChests = true
 
 local mineRange = 600
 local minRar = 100
 local blocksPerTick = 25
 local maxAttempts = 15
 local recipe = nil --"Lucky Staff"
+
+local chestOpenDuration = 1
+local chestOpenAttempts = 1
+local clttl = 300
+local cci = 30
 
 local tping = false
 local spos = nil
@@ -70,6 +77,7 @@ local WorkspaceBlocks = workspace:WaitForChild("Blocks")
 local Chests = workspace:WaitForChild("Chests")
 
 local sorted = {}
+local openedChests = {}
 
 local function CheckDistance(p1, p2)
     return (p1 - p2).Magnitude
@@ -102,6 +110,8 @@ local function PositionRoot(tcf)
 	local root = GetRoot()
 	if not root then return end
 	root.CFrame = tcf
+	root.AssemblyLinearVelocity  = V0
+	root.AssemblyAngularVelocity = V0
 end
 
 local noclipPts={}
@@ -125,27 +135,61 @@ local function NoclipLoop()
 	end
 end
 
+local function GetChestData(m)
+    local d = openedChests[m]
+
+    if not d then
+        d = {
+            Attempts = 0,
+            LastAttempt = tick(),
+        }
+        openedChests[m] = d
+    end
+
+    return d
+end
+
+local function RemoveChestLog(m)
+    openedChests[m] = nil
+end
+
 local function OpenChest(m)
-	local pp = FindFirstDescendantOfClass(m, "ProximityPrompt")
-	if not pp then return end
+    local d = GetChestData(m)
 
-	if not tping then
-		local r = GetRoot()
-		if r then
-			spos = r.CFrame
-		end
-	end
-	tping = true
-	PositionRoot(m:GetPivot())
+    if d.Attempts >= chestOpenAttempts then
+        return
+    end
 
-	task.wait()
+    d.Attempts += 1
+    d.LastAttempt = tick()
 
-	UpdateProximityDuration(pp, 0)
-	fireproximityprompt(pp)
+    local pp = FindFirstDescendantOfClass(m, "ProximityPrompt")
+    if not pp then
+        return
+    end
 
-	task.wait(0.1)
+    if not tping then
+        local r = GetRoot()
+        if r then
+            spos = r.CFrame
+        end
+    end
 
-	PositionRoot(spos)
+    tping = true
+    PositionRoot(m:GetPivot())
+
+    local t = tick() + chestOpenDuration
+
+    while task.wait(0.05) do
+        if tick() >= t then
+            break
+        end
+
+        UpdateProximityDuration(pp, 0)
+        fireproximityprompt(pp)
+    end
+
+    PositionRoot(spos)
 end
 
 local function MineBlock(block)
@@ -293,6 +337,22 @@ task.spawn(function()
 	end
 end)
 
+task.spawn(function()
+    while true do
+        task.wait(cci)
+
+        local now = tick()
+
+        for model, data in pairs(openedChests) do
+            if not model or not model.Parent then
+                openedChests[model] = nil
+            elseif data.LastAttempt and now - data.LastAttempt >= clttl then
+                openedChests[model] = nil
+            end
+        end
+    end
+end)
+
 local InfoTab   = Window:CreateTab("Info",   4483362458)
 local PlayerTab = Window:CreateTab("Player", 4483362458)
 local AutoTab   = Window:CreateTab("Auto",   4483362458)
@@ -335,5 +395,5 @@ AutoTab:CreateSlider({ Name="Minimum Rarity", Range={1,999}, Increment=1, Suffix
 AutoTab:CreateSection("Chests")
 AutoTab:CreateToggle({ Name="Auto Open Chests", CurrentValue=autoOpenChests, Flag="autoMineOres",
 	Callback=function(v) autoOpenChests=v end })
-AutoTab:CreateToggle({ Name="Instant Chests", CurrentValue=autoMineOres, Flag="instaChests",
-	Callback=function(v) instaOpenChests=v end })
+--[[AutoTab:CreateToggle({ Name="Instant Chests", CurrentValue=autoMineOres, Flag="instaChests",
+	Callback=function(v) instaOpenChests=v end })]]
