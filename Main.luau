@@ -121,7 +121,7 @@ local function CamLookAtCF(cP, tP)
 	workspace.CurrentCamer.CFrame = CFrame.lookAt(cP, tP)
 end
 
-local function HideSingle(o)
+local function HideSingle(obj)
 	if obj:IsA("BasePart") then
         obj.Transparency = 1
         obj.CanCollide = false
@@ -132,7 +132,7 @@ end
 
 local function HideAll(m)
     for _, obj in ipairs(m:GetDescendants()) do
-        HideSingle(o)
+        HideSingle(obj)
     end
 end
 
