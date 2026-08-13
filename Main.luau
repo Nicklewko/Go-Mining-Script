@@ -195,7 +195,7 @@ local function OpenChest(m)
 
         UpdateProximityDuration(pp, 0)
         fireproximityprompt(pp)
-		CamerLookAtCF(nil, m:GetPivot())
+		CamLookAtCF(nil, m:GetPivot())
     end
 
     PositionRoot(spos)
