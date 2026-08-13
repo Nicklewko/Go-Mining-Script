@@ -18,7 +18,7 @@ local autoOpenChests = false
 local instaOpenChests = true
 
 local mineRange = 600
-local minRar = 100
+local minRar = 1
 local blocksPerTick = 25
 local maxAttempts = 25
 local recipe = nil --"Lucky Staff"
@@ -414,7 +414,8 @@ InfoTab:CreateButton({
 	Callback = function() setclipboard(dcInvite) end,
 })
 InfoTab:CreateSection("Notes")
-InfoTab:CreateParagraph({ Title="NOTE:", Content="Added UI / Player Section and Auto (fOR)" })
+InfoTab:CreateParagraph({ Title="Updates:", Content="Added Chest functions" })
+InfoTab:CreateParagraph({ Title="NOTE:", Content="Jump Height might not be working / This script is still heavily WIP" })
 InfoTab:CreateSection("Hotkeys")
 InfoTab:CreateLabel("K — Toggle UI")
 
@@ -435,11 +436,12 @@ PlayerTab:CreateToggle({ Name="Anti-AFK (WIP)", CurrentValue=antiAfk, Flag="anti
 AutoTab:CreateSection("Main")
 AutoTab:CreateToggle({ Name="Auto Mine Ores", CurrentValue=autoMineOres, Flag="autoMineOres",
 	Callback=function(v) autoMineOres=v; if v then LoopMineAll() end end })
-AutoTab:CreateSlider({ Name="Minimum Rarity", Range={1,999}, Increment=1, Suffix="k",
+AutoTab:CreateSlider({ Name="Minimum Rarity", Range={1,100}, Increment=1, Suffix="k",
 	CurrentValue=minRar, Flag="minRar",
 	Callback=function(v) minRar=v*1000 end })
 
 AutoTab:CreateSection("Chests")
+AutoTab:CreateParagraph({ Title="Instant Open Chests:", Content="On" })
 AutoTab:CreateToggle({ Name="Auto Open Chests", CurrentValue=autoOpenChests, Flag="autoMineOres",
 	Callback=function(v) autoOpenChests=v end })
 --[[AutoTab:CreateToggle({ Name="Instant Chests", CurrentValue=autoMineOres, Flag="instaChests",
