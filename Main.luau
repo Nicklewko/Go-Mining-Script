@@ -4,6 +4,8 @@ local OreData = require(game.ReplicatedStorage.Modules.OresModule).Ores
 local ItemData = require(game.ReplicatedStorage.Modules.ItemsModule)
 
 local MineRemote = game.ReplicatedStorage.Events.ClientRemoteEvents.MineOre
+local TeleportRemote = game.ReplicatedStorage.Events.ClientRemoteEvents.TeleportPlayer
+local ServerChatRemote = game.ReplicatedStorage.Events.ServerRemoteEvents.ServerChat
 local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/jxinxy/alphalibrary/refs/heads/main/main.luau"))()
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
@@ -31,6 +33,28 @@ local cci = 30
 local tping = false
 local spos = nil
 local ccf = nil
+
+local autoTpAfterReset = false
+local selectedDepth = nil
+local tpDepths = {
+	"500m",
+	"1000m",
+	"1500m",
+	"2000m",
+	"2500m",
+	"3000m",
+	"3500m",
+	"4000m",
+	"4500m",
+	"5000m",
+	"5500m",
+	"6000m",
+	"6500m",
+	"7000m",
+	"7500m",
+	"8000m",
+	"8500m",
+}
 
 local Window = Rayfield:CreateWindow({
 	Name="Something", Icon=0,
@@ -120,6 +144,17 @@ local function CamLookAtCF(cP, tP)
 	cP = cP or workspace.CurrentCamera.CFrame.Position
 	workspace.CurrentCamer.CFrame = CFrame.lookAt(cP, tP)
 end
+
+local function TeleportToSelectedDepth()
+	if not selectedDepth or not autoTpAfterReset then return end
+	TeleportRemote:FireServer(selectedDepth)
+end
+
+ServerChatRemote.OnClientEvent:Connect(function(a, b, c ,d ,e)
+	if e == "MineRegenerated" then
+		TeleportToSelectedDepth()
+	end
+end)
 
 local function HideSingle(obj)
 	if obj:IsA("BasePart") then
@@ -403,6 +438,7 @@ end)
 local InfoTab   = Window:CreateTab("Info",   4483362458)
 local PlayerTab = Window:CreateTab("Player", 4483362458)
 local AutoTab   = Window:CreateTab("Auto",   4483362458)
+local AfkTab   = Window:CreateTab("AFK",   4483362458)
 
 local dcInvite = "https://discord.gg/"
 
@@ -429,10 +465,6 @@ PlayerTab:CreateSlider({ Name="Jump Height", Range={0,100}, Increment=0.5,
 	CurrentValue=jumpH, Flag="jumph",
 	Callback=function(v) jumpH=v end })
 
-PlayerTab:CreateSection("Misc")
-PlayerTab:CreateToggle({ Name="Anti-AFK (WIP)", CurrentValue=antiAfk, Flag="antiafk",
-	Callback=function(v) antiAfk=v end })
-
 AutoTab:CreateSection("Main")
 AutoTab:CreateToggle({ Name="Auto Mine Ores", CurrentValue=autoMineOres, Flag="autoMineOres",
 	Callback=function(v) autoMineOres=v; if v then LoopMineAll() end end })
@@ -446,3 +478,13 @@ AutoTab:CreateToggle({ Name="Auto Open Chests", CurrentValue=autoOpenChests, Fla
 	Callback=function(v) autoOpenChests=v end })
 --[[AutoTab:CreateToggle({ Name="Instant Chests", CurrentValue=autoMineOres, Flag="instaChests",
 	Callback=function(v) instaOpenChests=v end })]]
+
+AfkTab:CreateSection("Layer Teleportation")
+AfkTab:CreateDropdown({ Name="Select Depth", Options=tpDepths, CurrentOption={},
+	MultipleOptions=false, Flag="tpDepthSelection",
+	Callback=function(o) selectedDepth=o end })
+AfkTab:CreateToggle({ Name="Auto teleport after reset", CurrentValue=autoTpAfterReset, Flag="autoTpAfterReset",
+	Callback=function(v) autoTpAfterReset=v end })
+AfkTab:CreateSection("Anti")
+AfkTab:CreateToggle({ Name="Anti-AFK (WIP)", CurrentValue=antiAfk, Flag="antiafk",
+	Callback=function(v) antiAfk=v end })
