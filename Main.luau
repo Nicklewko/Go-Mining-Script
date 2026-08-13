@@ -30,6 +30,7 @@ local cci = 30
 
 local tping = false
 local spos = nil
+local ccf = nil
 
 local Window = Rayfield:CreateWindow({
 	Name="Something", Icon=0,
@@ -115,6 +116,11 @@ local function PositionRoot(tcf)
 	root.AssemblyAngularVelocity = V0
 end
 
+local function CamLookAtCF(cP, tP)
+	cP = cP or workspace.CurrentCamera.CFrame.Position
+	workspace.CurrentCamer.CFrame = CFrame.lookAt(cP, tP)
+end
+
 local noclipPts={}
 local function RebuildNC(char)
 	noclipPts={}
@@ -174,6 +180,7 @@ local function OpenChest(m)
         if r then
             spos = r.CFrame
         end
+		ccf = workspace.CurrentCamera.CFrame
     end
 
     tping = true
@@ -181,17 +188,19 @@ local function OpenChest(m)
 
     local t = tick() + chestOpenDuration
 
-    while task.wait(0.05) do
+    while task.wait(0.02) do
         if tick() >= t then
             break
         end
 
         UpdateProximityDuration(pp, 0)
         fireproximityprompt(pp)
+		CamerLookAtCF(nil, m:GetPivot())
     end
 
     PositionRoot(spos)
 	tping = false
+	workspace.CurrentCamera.CFrame = ccf
 end
 
 local function MineBlock(block)
