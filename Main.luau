@@ -488,5 +488,7 @@ AfkTab:CreateDropdown({ Name="Select Depth", Options=tpDepths, CurrentOption={},
 AfkTab:CreateToggle({ Name="Auto teleport after reset", CurrentValue=autoTpAfterReset, Flag="autoTpAfterReset",
 	Callback=function(v) autoTpAfterReset=v end })
 AfkTab:CreateSection("Anti")
-AfkTab:CreateToggle({ Name="Anti-AFK (WIP)", CurrentValue=antiAfk, Flag="antiafk",
-	Callback=function(v) antiAfk=v end })
+AfkTab:CreateButton({
+	Name = "Execute Anti Afk script",
+	Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/evxncodes/mainroblox/main/anti-afk", true))() end,
+})
