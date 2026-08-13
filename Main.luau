@@ -121,6 +121,41 @@ local function CamLookAtCF(cP, tP)
 	workspace.CurrentCamer.CFrame = CFrame.lookAt(cP, tP)
 end
 
+local function HideSingle(o)
+	if obj:IsA("BasePart") then
+        obj.Transparency = 1
+        obj.CanCollide = false
+        obj.CanTouch = false
+        obj.CanQuery = false
+    end
+end
+
+local function HideAll(m)
+    for _, obj in ipairs(m:GetDescendants()) do
+        HideSingle(o)
+    end
+end
+
+local function MoveInFrontOfCamera(obj, distance)
+    local camera = workspace.CurrentCamera
+    if not camera or not obj then
+        return
+    end
+
+    distance = distance or 5
+
+    local cf = camera.CFrame
+    local target = cf.Position + cf.LookVector * distance
+
+    if obj:IsA("Model") then
+		HideAll(obj)
+        obj:PivotTo(CFrame.new(target, target + cf.LookVector))
+    elseif obj:IsA("BasePart") then
+		HideSingle(obj)
+        obj.CFrame = CFrame.new(target, target + cf.LookVector)
+    end
+end
+
 local noclipPts={}
 local function RebuildNC(char)
 	noclipPts={}
@@ -195,7 +230,8 @@ local function OpenChest(m)
 
         UpdateProximityDuration(pp, 0)
         fireproximityprompt(pp)
-		CamLookAtCF(nil, m:GetPivot())
+		MoveInFrontOfCamera(pp.Parent)
+		--CamLookAtCF(nil, m:GetPivot())
     end
 
     PositionRoot(spos)
