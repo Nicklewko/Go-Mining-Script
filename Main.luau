@@ -151,9 +151,10 @@ local function TeleportToSelectedDepth()
 end
 
 ServerChatRemote.OnClientEvent:Connect(function(a, b, c ,d ,e)
-	print(a,b,c,d,e)
 	if e == "MineRegenerated" then
-		TeleportToSelectedDepth()
+		task.delay(1, function()
+			TeleportToSelectedDepth()
+		end)
 	end
 end)
 
