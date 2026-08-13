@@ -25,7 +25,7 @@ local recipe = nil --"Lucky Staff"
 
 local chestOpenDuration = 1
 local chestOpenAttempts = 1
-local clttl = 300
+local clttl = 150
 local cci = 30
 
 local tping = false
