@@ -57,7 +57,7 @@ local tpDepths = {
 }
 
 local Window = Rayfield:CreateWindow({
-	Name="Something", Icon=0,
+	Name="Something v1.1", Icon=0,
 	LoadingTitle="Something", LoadingSubtitle="By Someone",
 	ShowText="-... --- -- -... --- -.-. .-.. .- -",
 	Theme={
@@ -152,9 +152,7 @@ end
 
 ServerChatRemote.OnClientEvent:Connect(function(a, b, c ,d ,e)
 	if e == "MineRegenerated" then
-		task.delay(1, function()
-			TeleportToSelectedDepth()
-		end)
+		TeleportToSelectedDepth()
 	end
 end)
 
@@ -452,7 +450,8 @@ InfoTab:CreateButton({
 	Callback = function() setclipboard(dcInvite) end,
 })
 InfoTab:CreateSection("Notes")
-InfoTab:CreateParagraph({ Title="Updates:", Content="Added Chest functions" })
+InfoTab:CreateParagraph({ Title="v1.1:", Content="Added the afk tab" })
+InfoTab:CreateParagraph({ Title="v1:", Content="Added chest functions" })
 InfoTab:CreateParagraph({ Title="NOTE:", Content="Jump Height might not be working / This script is still heavily WIP" })
 InfoTab:CreateSection("Hotkeys")
 InfoTab:CreateLabel("K — Toggle UI")
