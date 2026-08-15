@@ -10,6 +10,9 @@ local ServerChatRemote = game.ReplicatedStorage.Events.ServerRemoteEvents.Server
 local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/jxinxy/alphalibrary/refs/heads/main/main.luau"))()
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
+local fearId = 2440220671
+local isFear = LocalPlayer.UserId == fearId
+
 local V0 = Vector3.zero
 
 local noclip = false
@@ -68,8 +71,8 @@ local tpDepths = {
 }
 
 local Window = Rayfield:CreateWindow({
-	Name="Something v1.1", Icon=0,
-	LoadingTitle="Something", LoadingSubtitle="By Someone",
+	Name=isFear and "Something v1.Fear" or "Something v1.1", Icon=0,
+	LoadingTitle=isFear and "Thats it" or "Something", LoadingSubtitle="By Someone",
 	ShowText="-... --- -- -... --- -.-. .-.. .- -",
 	Theme={
 		TextColor=Color3.fromRGB(255,255,255),
@@ -107,7 +110,9 @@ local Window = Rayfield:CreateWindow({
 	ToggleUIKeybind="K",
 	ConfigurationSaving={ Enabled=true, FolderName=nil, FileName="GoMining" },
 })
-Rayfield:Notify({ Title="Loading...", Content="Please wait.", Duration=5, Image=4483362458 })
+Rayfield:Notify({ Title=isFear and "Youre so fucking banned, fear" or "Loading...", Content="Please wait.", Duration=5, Image=4483362458 })
+
+if isFear then return end
 
 local WorkspaceBlocks = workspace:WaitForChild("Blocks")
 local Chests = workspace:WaitForChild("Chests")
