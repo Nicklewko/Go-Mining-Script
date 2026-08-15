@@ -71,8 +71,8 @@ local tpDepths = {
 }
 
 local Window = Rayfield:CreateWindow({
-	Name=isFear and "Something v1.Fear" or "Something v1.1", Icon=0,
-	LoadingTitle=isFear and "Thats it" or "Something", LoadingSubtitle="By Someone",
+	Name=isFear and "Scriptn't" or "Something v1.1", Icon=0,
+	LoadingTitle=isFear and "Scriptn't" or "Something", LoadingSubtitle="By Someone",
 	ShowText="-... --- -- -... --- -.-. .-.. .- -",
 	Theme={
 		TextColor=Color3.fromRGB(255,255,255),
@@ -110,7 +110,7 @@ local Window = Rayfield:CreateWindow({
 	ToggleUIKeybind="K",
 	ConfigurationSaving={ Enabled=true, FolderName=nil, FileName="GoMining" },
 })
-Rayfield:Notify({ Title=isFear and "Youre so fucking banned, fear" or "Loading...", Content="Please wait.", Duration=5, Image=4483362458 })
+Rayfield:Notify({ Title=isFear and "Scriptn't" or "Loading...", Content="Please wait.", Duration=5, Image=4483362458 })
 
 local function PlaySound(id)
 	local s = Instance.new("Sound")
