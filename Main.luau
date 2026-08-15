@@ -20,8 +20,7 @@ local autoMineOres = false
 local autoOpenChests = false
 local instaOpenChests = true
 local antiFall = true
-local antiFallDuration = 15
-
+local antiFallDuration = 8
 local mineRange = 600
 local minRar = 1000
 local blocksPerTick = 25
