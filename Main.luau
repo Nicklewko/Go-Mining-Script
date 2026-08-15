@@ -1,3 +1,4 @@
+local RunService = game:GetService("RunService")
 local LocalPlayer = game.Players.LocalPlayer
 
 local OreData = require(game.ReplicatedStorage.Modules.OresModule).Ores
@@ -18,6 +19,8 @@ local antiAfk = false
 local autoMineOres = false
 local autoOpenChests = false
 local instaOpenChests = true
+local antiFall = true
+local antiFallDuration = 15
 
 local mineRange = 600
 local minRar = 1000
@@ -33,6 +36,13 @@ local cci = 30
 local tping = false
 local spos = nil
 local ccf = nil
+
+local characterConnection
+local stateConnection
+local heartbeatConnection
+
+local falling = false
+local fallStart = 0
 
 local whiteList = {"Tinted Glass", "Black Pearl", "Onyx"}
 
@@ -369,6 +379,77 @@ local function LoopMineAll()
     end
 end
 
+local function OnFallDetected(character, duration)
+	TeleportToSelectedDepth()
+end
+
+local function CleanupCharacterAntiFall()
+	if stateConnection then
+		stateConnection:Disconnect()
+		stateConnection = nil
+	end
+
+	if heartbeatConnection then
+		heartbeatConnection:Disconnect()
+		heartbeatConnection = nil
+	end
+
+	falling = false
+	fallStart = 0
+end
+
+local function SetupCharacterAntiFall(character)
+	CleanupCharacterAntiFall()
+
+	local humanoid = character:WaitForChild("Humanoid")
+
+	stateConnection = humanoid.StateChanged:Connect(function(_, newState)
+		if not antiFall then
+			falling = false
+			fallStart = 0
+			return
+		end
+
+		if newState == Enum.HumanoidStateType.Freefall then
+			if not falling then
+				falling = true
+				fallStart = os.clock()
+			end
+		else
+			falling = false
+			fallStart = 0
+		end
+	end)
+
+	heartbeatConnection = RunService.Heartbeat:Connect(function()
+		if not antiFall or not falling then
+			return
+		end
+
+		if not character.Parent then
+			CleanupCharacterAntiFall()
+			return
+		end
+
+		local duration = os.clock() - fallStart
+
+		if duration >= antiFallDuration then
+			falling = false
+			fallStart = 0
+
+			OnFallDetected(character, duration)
+		end
+	end)
+end
+
+if Player.Character then
+	SetupCharacterAntiFall(Player.Character)
+end
+
+characterConnection = Player.CharacterAdded:Connect(function(character)
+	SetupCharacterAntiFall(character)
+end)
+
 WorkspaceBlocks.ChildAdded:Connect(logBlock)
 
 WorkspaceBlocks.ChildRemoved:Connect(unlog)
@@ -490,6 +571,8 @@ AfkTab:CreateDropdown({ Name="Select Depth", Options=tpDepths, CurrentOption={},
 AfkTab:CreateToggle({ Name="Auto teleport after reset", CurrentValue=autoTpAfterReset, Flag="autoTpAfterReset",
 	Callback=function(v) autoTpAfterReset=v end })
 AfkTab:CreateSection("Anti")
+AfkTab:CreateToggle({ Name="Anti Fall", CurrentValue=antiFall, Flag="antiFall",
+	Callback=function(v) antiFall=v end })
 AfkTab:CreateButton({
 	Name = "Execute Anti Afk script",
 	Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/evxncodes/mainroblox/main/anti-afk", true))() end,
