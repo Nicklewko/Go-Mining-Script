@@ -34,6 +34,8 @@ local tping = false
 local spos = nil
 local ccf = nil
 
+local whiteList = {"Tinted Glass", "Black Pearl", "Onyx"}
+
 local autoTpAfterReset = false
 local selectedDepth = nil
 local tpDepths = {
@@ -295,7 +297,6 @@ end
 
 local function MineWithCheck(block)
     if sorted[block].Attempt >= maxAttempts then
-		warn("Removed:", block)
 	    unlog(block)
         return
     end
@@ -313,8 +314,6 @@ local function MineWithCheck(block)
 
     MineBlock(block)
 
-    print("Mining:", block, "Attempt:", sorted[block].Attempt)
-
     task.wait()
 end
 
@@ -328,25 +327,27 @@ local function logBlock(block)
         return
     end
 
-    if minRar
-        and OreData[block.Name]
-        and OreData[block.Name].Rarity
-        and OreData[block.Name].Rarity <= minRar then
-        return
-    end
+    if not table.find(whiteList, block.Name) then
+		if minRar
+        	and OreData[block.Name]
+        	and OreData[block.Name].Rarity
+        	and OreData[block.Name].Rarity <= minRar then
+        	return
+    	end
 
-    if recipe
-        and ItemData[recipe]
-        and ItemData[recipe].block
-        and not ItemData[recipe].block.Name then
-        return
-    end
+    	if recipe
+        	and ItemData[recipe]
+        	and ItemData[recipe].block
+        	and not ItemData[recipe].block.Name then
+        	return
+    	end
+	else
+		print(block, "whitelisted")
+	end
 
     sorted[block] = {
         Attempt = 0
     }
-
-    warn("Added:", block)
 
 	if autoMineOres then
 		MineWithCheck(block)
@@ -479,6 +480,8 @@ AutoTab:CreateToggle({ Name="Auto Open Chests", CurrentValue=autoOpenChests, Fla
 	Callback=function(v) autoOpenChests=v end })
 --[[AutoTab:CreateToggle({ Name="Instant Chests", CurrentValue=autoMineOres, Flag="instaChests",
 	Callback=function(v) instaOpenChests=v end })]]
+
+AutoTab:CreateSection("Whitelist")
 
 AfkTab:CreateSection("Layer Teleportation")
 AfkTab:CreateDropdown({ Name="Select Depth", Options=tpDepths, CurrentOption={},
