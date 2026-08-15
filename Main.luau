@@ -10,7 +10,7 @@ local ServerChatRemote = game.ReplicatedStorage.Events.ServerRemoteEvents.Server
 local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/jxinxy/alphalibrary/refs/heads/main/main.luau"))()
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
-local fearId = 0 --2440220671
+local fearId = 2440220671
 local isFear = LocalPlayer.UserId == fearId
 
 local V0 = Vector3.zero
