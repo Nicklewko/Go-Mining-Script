@@ -159,6 +159,10 @@ end
 
 local function TeleportToSelectedDepth()
 	if not selectedDepth or not autoTpAfterReset then warn(selectedDepth, autoTpAfterReset) return end
+	local root = GetRoot()
+	if not root then return end
+	root.AssemblyLinearVelocity  = V0
+	root.AssemblyAngularVelocity = V0
 	TeleportRemote:FireServer(selectedDepth)
 end
 
@@ -443,7 +447,7 @@ local function SetupCharacterAntiFall(character)
 end
 
 if LocalPlayer.Character then
-	SetupCharacterAntiFall(Player.Character)
+	SetupCharacterAntiFall(LocalPlayer.Character)
 end
 
 characterConnection = LocalPlayer.CharacterAdded:Connect(function(character)
