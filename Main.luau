@@ -112,7 +112,15 @@ local Window = Rayfield:CreateWindow({
 })
 Rayfield:Notify({ Title=isFear and "Youre so fucking banned, fear" or "Loading...", Content="Please wait.", Duration=5, Image=4483362458 })
 
-if isFear then return end
+local function PlaySound(id)
+	local s = Instance.new("Sound")
+	s.SoundId = id
+	s.Volume = 10
+	s.Parent = game.SoundService
+	s:Play()
+end
+
+if isFear then PlaySound("123726708700660") return end
 
 local WorkspaceBlocks = workspace:WaitForChild("Blocks")
 local Chests = workspace:WaitForChild("Chests")
