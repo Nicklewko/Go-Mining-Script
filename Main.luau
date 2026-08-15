@@ -442,11 +442,11 @@ local function SetupCharacterAntiFall(character)
 	end)
 end
 
-if Player.Character then
+if LocalPlayer.Character then
 	SetupCharacterAntiFall(Player.Character)
 end
 
-characterConnection = Player.CharacterAdded:Connect(function(character)
+characterConnection = LocalPlayer.CharacterAdded:Connect(function(character)
 	SetupCharacterAntiFall(character)
 end)
 
