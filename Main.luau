@@ -580,6 +580,21 @@ AutoTab:CreateToggle({ Name="Auto Open Chests", CurrentValue=autoOpenChests, Fla
 
 AutoTab:CreateSection("Whitelist")
 
+local paragraph = AutoTab:CreateParagraph({Title = "Whitelisted ores:", Content = ""})
+
+AutoTab:CreateInput({
+   Name = "Add to whitelist",
+   CurrentValue = "",
+   PlaceholderText = "Ore name",
+   RemoveTextAfterFocusLost = true,
+   Flag = "Input1",
+   Callback = function(text)
+		table.insert(whitelist, text)
+		local str = table.concat(array, ", ")
+		paragraph:Set({Content = str})
+   end,
+})
+
 AfkTab:CreateSection("Layer Teleportation")
 AfkTab:CreateDropdown({ Name="Select Depth", Options=tpDepths, CurrentOption={},
 	MultipleOptions=false, Flag="tpDepthSelection",
