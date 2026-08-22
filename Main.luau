@@ -17,10 +17,10 @@ local isFear = LocalPlayer.UserId == fearId
 local V0 = Vector3.zero
 
 local noclip = false
-local walkSpd = 45
+local walkSpd = 125
 local jumpH = 30
 local antiAfk = false
-local autoAbility = false
+local autoAbility = true
 local autoMineOres = false
 local autoOpenChests = false
 local instaOpenChests = true
