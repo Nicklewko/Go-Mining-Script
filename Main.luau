@@ -46,7 +46,7 @@ local heartbeatConnection
 local falling = false
 local fallStart = 0
 
-local whiteList = {}
+local whitelist = {}
 
 local autoTpAfterReset = false
 local selectedDepth = nil
@@ -353,7 +353,7 @@ local function logBlock(block)
         return
     end
 
-    if not table.find(whiteList, block.Name) then
+    if not table.find(whitelist, block.Name) then
 		if minRar
         	and OreData[block.Name]
         	and OreData[block.Name].Rarity
