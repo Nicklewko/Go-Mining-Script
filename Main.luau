@@ -5,6 +5,7 @@ local OreData = require(game.ReplicatedStorage.Modules.OresModule).Ores
 local ItemData = require(game.ReplicatedStorage.Modules.ItemsModule)
 
 local MineRemote = game.ReplicatedStorage.Events.ClientRemoteEvents.MineOre
+local AbilityRemote = game.ReplicatedStorage.Events.ClientRemoteEvents.UseAbility
 local TeleportRemote = game.ReplicatedStorage.Events.ClientRemoteEvents.TeleportPlayer
 local ServerChatRemote = game.ReplicatedStorage.Events.ServerRemoteEvents.ServerChat
 local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/jxinxy/alphalibrary/refs/heads/main/main.luau"))()
@@ -19,6 +20,7 @@ local noclip = false
 local walkSpd = 45
 local jumpH = 30
 local antiAfk = false
+local autoAbility = false
 local autoMineOres = false
 local autoOpenChests = false
 local instaOpenChests = true
@@ -71,7 +73,7 @@ local tpDepths = {
 }
 
 local Window = Rayfield:CreateWindow({
-	Name=isFear and "Scriptn't" or "Something v1.1", Icon=0,
+	Name=isFear and "Scriptn't" or "Something v1.2", Icon=0,
 	LoadingTitle=isFear and "Scriptn't" or "Something", LoadingSubtitle="By Someone",
 	ShowText="-... --- -- -... --- -.-. .-.. .- -",
 	Theme={
@@ -500,6 +502,9 @@ end)
 warn("Initiated")
 task.spawn(function()
 	while task.wait(0.35) do
+		if autoAbility then
+			AbilityRemote:FireServer()
+		end
 		if not autoMineOres then continue end
     	LoopMineAll()
 	end
@@ -548,9 +553,8 @@ InfoTab:CreateButton({
 	Callback = function() setclipboard(dcInvite) end,
 })
 InfoTab:CreateSection("Notes")
-InfoTab:CreateParagraph({ Title="v1.1:", Content="Added the afk tab" })
-InfoTab:CreateParagraph({ Title="v1:", Content="Added chest functions" })
-InfoTab:CreateParagraph({ Title="NOTE:", Content="Jump Height might not be working / This script is still heavily WIP" })
+InfoTab:CreateParagraph({ Title="v1.2:", Content="Ability, whitelist" })
+InfoTab:CreateParagraph({ Title="NOTE:", Content="Jump Height might not be working" })
 InfoTab:CreateSection("Hotkeys")
 InfoTab:CreateLabel("K — Toggle UI")
 
@@ -560,9 +564,6 @@ PlayerTab:CreateToggle({ Name="Noclip", CurrentValue=noclip, Flag="noclip",
 PlayerTab:CreateSlider({ Name="Walk Speed", Range={0,250}, Increment=1,
 	CurrentValue=walkSpd, Flag="walkspd",
 	Callback=function(v) walkSpd=v end })
-PlayerTab:CreateSlider({ Name="Jump Height", Range={0,100}, Increment=0.5,
-	CurrentValue=jumpH, Flag="jumph",
-	Callback=function(v) jumpH=v end })
 
 AutoTab:CreateSection("Main")
 AutoTab:CreateToggle({ Name="Auto Mine Ores", CurrentValue=autoMineOres, Flag="autoMineOres",
@@ -570,6 +571,8 @@ AutoTab:CreateToggle({ Name="Auto Mine Ores", CurrentValue=autoMineOres, Flag="a
 AutoTab:CreateSlider({ Name="Minimum Rarity", Range={1,100}, Increment=1, Suffix="k",
 	CurrentValue=minRar/1000, Flag="minRar",
 	Callback=function(v) minRar=v*1000 end })
+AutoTab:CreateToggle({ Name="Auto Activate Ability", CurrentValue=autoAbility, Flag="autoAbility",
+	Callback=function(v) autoAbility=v end })
 
 AutoTab:CreateSection("Chests")
 AutoTab:CreateParagraph({ Title="Instant Open Chests:", Content="On" })
