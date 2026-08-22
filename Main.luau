@@ -46,7 +46,7 @@ local heartbeatConnection
 local falling = false
 local fallStart = 0
 
-local whiteList = {"Tinted Glass", "Black Pearl", "Onyx"}
+local whiteList = {}
 
 local autoTpAfterReset = false
 local selectedDepth = nil
