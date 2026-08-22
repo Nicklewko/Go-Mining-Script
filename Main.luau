@@ -590,7 +590,7 @@ AutoTab:CreateInput({
    Flag = "Input1",
    Callback = function(text)
 		table.insert(whitelist, text)
-		local str = table.concat(array, ", ")
+		local str = table.concat(whitelist, ", ")
 		paragraph:Set({Content = str})
    end,
 })
